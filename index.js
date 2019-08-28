@@ -7,6 +7,8 @@ mongoose.set('useNewUrlParser', true);      // 1
 mongoose.set('useFindAndModify', false);    // 1
 mongoose.set('useCreateIndex', true);       // 1
 
+console.log("process.env.MONGO_DB: ", process.env);
+
 mongoose.connect(process.env.MONGO_DB);     // 2
 
 var db = mongoose.connection;               // 3
