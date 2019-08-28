@@ -15,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/jeongmyeonghyeon/02_node_address/issues"
   },
-  "homepage": "https://github.com/jeongmyeonghyeon/02_node_address#readme"
+  "homepage": "https://github.com/jeongmyeonghyeon/02_node_address#readme",
+  "dependencies": {
+    "ejs": "^2.6.2",
+    "express": "^4.17.1",
+    "mongoose": "^5.6.11"
+  }
 }
