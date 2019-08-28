@@ -1,22 +1,21 @@
 var express = require("express");
 var mongoose = require("mongoose");
+var bodyParser = require("body-parser"); // 1. body-parser module 을 bodyParser 변수에 담음.
 var app = express();
 
-// DB setting
-mongoose.set('useNewUrlParser', true);      // 1
-mongoose.set('useFindAndModify', false);    // 1
-mongoose.set('useCreateIndex', true);       // 1
+// DB setting ...
+mongoose.set('useNewUrlParser', true);      
+mongoose.set('useFindAndModify', false);    
+mongoose.set('useCreateIndex', true);
 
-console.log("process.env.MONGO_DB: ", process.env);
+mongoose.connect(process.env.MONGO_DB);     
 
-mongoose.connect(process.env.MONGO_DB);     // 2
+var db = mongoose.connection;               
 
-var db = mongoose.connection;               // 3
-// 4
 db.once("open", function () {
     console.log("DB connected");
 });
-// 5
+
 db.on("error", function (err) {
     console.log("DB ERROR: ", err)
 });
@@ -24,36 +23,77 @@ db.on("error", function (err) {
 // Other settings
 app.set("view engine", "ejs");
 app.use(express.static(__dirname+"/public"));
+app.use(bodyParser.json()); // 2
+app.use(bodyParser.urlencoded({extended:true})) // 3
+// 2&3
+// : bodyParser로 stream의 form data를 req.body에 옮겨 담음.
+// 2번은 json data 를.
+// 3번은 urlencoded data 를 분석해서 req.body 를 생성.
+// ※ 쉽게 얘기해 이 모듈로 이렇게 처리를 해줘야 form 에 입력한 data 가 req.body 에 object로 생성됨.
 
-// Port setting
+// DB schema // 4
+// mongoose.Schema 함수를 사용해서 DB에서 사용할 schema object를 생성.
+// 이 형태대로 DB에 data가 저장됨.
+var contactSchema = mongoose.Schema({
+    name: {type:String, required: true, unique: true},  // 반드시 입력되어야 하며 (required), 중복되면 안됨 (unique), type 은 String.
+    email: {type:String},
+    phone: {type:String}
+});
+// 나머지 사용가능한 schema type 들: https://mongoosejs.com/docs/schematypes.html
+var Contact = mongoose.model("contact", contactSchema); // 5
+
+// Routes
+// Home // 6
+app.get("/", function (req, res) {
+    res.redirect("/contacts");
+});
+// Contacts - Index // 7
+app.get("/contacts", function (req, res) {
+    Contact.find({}, function (err, contacts) {
+        if (err) return res.json(err);
+        res.render("contacts/index", {contacts:contacts});
+    });
+});
+// Contacts - New // 8
+app.get("/contacts/new", function(req, res) {
+    res.render("contacts/new");
+});
+// Contacts - create // 9
+app.post("/contacts", function (req, res) {
+    Contact.create(req.body, function (err, contact) {
+        if (err) return res.json(err);
+        res.redirect("/contacts");
+    });
+});
+
+// Port setting ...
 var port = 3000;
 app.listen(3000, function () {
     console.log("server on ! http://localhost:"+port);
 });
 
-// [DB setting 관련 설명]
 
-// 1. 
-// mongoose에서 내는 몇가지 경고를 안나게 하는 코드. 없어도 실행에는 아무런 문제가 없음.
-// 관련 내용 mongoose 문서: https://mongoosejs.com/docs/deprecations.html
 
-// 2.
-// 'process.env': node.js에서 기본으로 제공하는 Object. "환경변수"들을 가지고 있는 객체.
-// ※ 환경변수 설정 (내 환경의 경우, MacOS/zsh) ※
-// vi ~/.zshrc
-// export MONGO_DB="mongodb+srv://user:<password>@cluster0-ysiqz.mongodb.net/test?retryWrites=true&w=majority"
-// ※ 환경변수 확인 command → printenv 명령으로 확인 가능.
 
-// 3.
-// mongoose의 db object를 가져와 db변수에 넣는 과정.
-// 이 db 변수에는 DB와 관련된 이벤트 리스너 함수들이 있음.
 
-// 4.
-// db가 성공적으로 연결된 경우 "DB connect" 출력.
 
-// 5.
-// db 연결중 에러가 있는 경우 "DB ERROR: " 와 에러 출력.
 
-// + 추가설명 +
-// DB연결은 앱이 실행되면 단 한번만 일어나는 이벤트. 그러므로, db_once("이벤트 이름", 콜백함수) 함수를 사용.
-// error 는 DB접속시 뿐만 아니라, 다양한 경우에 발생할 수 있으며, DB 연결 후에는 DB 에러가 발생한 후에도 다른 DB 에러들이 또다시 발생할 수도 있기 때문에 db.on("이벤트_이름", 콜백함수) 함수를 사용합니다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
