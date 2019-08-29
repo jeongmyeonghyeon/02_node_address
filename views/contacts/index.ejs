@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- 1 -->
+    <% include ../partials/head %>
+</head>
+
+<body>
+    <!-- 2 -->
+    <% include ../partials/nav %>
+
+    <div class="contact contact-index">
+        <h2>Index</h2>
+        <ul>
+            <!-- 3 -->
+            <% contacts.forEach(function(contact) { %>
+            <li>
+                <%= contact.name %>
+            </li>
+            <% }) %>
+        </ul>
+    </div>
+</body>
+
+</html>
